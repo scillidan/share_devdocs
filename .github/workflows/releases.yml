@@ -50,13 +50,24 @@ jobs:
           gem install bundler
           bundle install
 
-      - name: Build
+      - name: Clean
         run: |
+          sudo apt-get clean
+          sudo apt-get autoremove
+          go clean -cache
+          gem cleanup
+
+      - name: Build document
+        run: |
+          cd devdocs
+          cp ../build_document.sh ./
           chmod +x build_document.sh
           ./build_document.sh
 
       - name: Convert docs.json to docs.md markdown table
         run: |
+          cd devdocs
+          cp ../docs_json_to_md.sh ./
           chmod +x docs_json_to_md.sh
           ./docs_json_to_md.sh
 
