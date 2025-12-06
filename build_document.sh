@@ -13,6 +13,9 @@ html_dir="./public/docs"
 mkdir -p "$md_dir"
 mkdir -p "$html_dir"
 
+# Navigate to the devdocs directory where Gemfile is located
+cd ./devdocs/ || { echo "Directory not found"; exit 1; }
+
 # List documents to build
 DOCS=$(bundle exec thor docs:list)
 
@@ -23,9 +26,6 @@ declare -A latest_html
 # Loop over each document to process
 for DOC in $DOCS; do
     echo "Processing document: $DOC"
-
-    # Ensure we are in the right directory
-    cd ./devdocs/ || { echo "Directory not found"; exit 1; }
 
     # Build the specific document
     bundle exec thor docs:download "$DOC"
@@ -62,7 +62,6 @@ for DOC in $DOCS; do
     else
         latest_html[$base_doc_name]="$html_dir/$dirname/*.html"
     fi
-
 done
 
 # Create all markdown and html zip files
@@ -77,11 +76,5 @@ done
 
 # Check disk space again
 df -h
-
-# Upload zip files (replace with your upload command)
-# Example: upload_command devdocs-md-all.zip
-# Example: upload_command devdocs-html-all.zip
-# Example: upload_command devdocs-md-latest.zip
-# Example: upload_command devdocs-html-latest.zip
 
 echo "All processing and zipping completed."
