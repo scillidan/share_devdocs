@@ -55,7 +55,6 @@ jobs:
           sudo apt-get clean
           sudo apt-get autoremove
           go clean -cache
-          gem cleanup
 
       - name: Build document
         run: |
