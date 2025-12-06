@@ -65,8 +65,12 @@ for DOC in $DOCS; do
 done
 
 # Create all markdown and html zip files
-zip -r devdocs-md-all.zip "$md_dir"/*.md
-zip -r devdocs-html-all.zip "$html_dir/*.html"
+echo "Markdown files created:"
+ls -al "$md_dir"
+zip -r devdocs-md-all.zip "$md_dir/*"
+echo "HTML files created:"
+ls -al "$html_dir"
+zip -r devdocs-html-all.zip "$html_dir/*"
 
 # Create latest version zip files
 for doc in "${!latest_md[@]}"; do
