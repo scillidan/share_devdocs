@@ -24,8 +24,8 @@ declare -A latest_html
 for DOC in $DOCS; do
     echo "Processing document: $DOC"
 
-    # Ensure we are in the right directory for the second script's functionality
-    cd devdocs
+    # Ensure we are in the right directory
+    cd ./devdocs/ || { echo "Directory not found"; exit 1; }
 
     # Build the specific document
     bundle exec thor docs:download "$DOC"
