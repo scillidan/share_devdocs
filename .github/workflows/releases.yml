@@ -1,0 +1,69 @@
+name: Create Releases
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 1 * *'  # 00:00 on the 1st of every month (UTC)
+
+jobs:
+  process-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set run date as release tag and filename date
+        id: run_date
+        run: |
+          echo "release_tag=$(date -u +%F)" >> $GITHUB_OUTPUT
+          echo "release_date_nodash=$(date -u +%Y%m%d)" >> $GITHUB_OUTPUT
+
+      - name: Get Ruby Version from Gemfile
+        id: get_ruby_version
+        run: |
+          ruby_version=$(curl -s https://raw.githubusercontent.com/freeCodeCamp/devdocs/refs/heads/main/Gemfile | grep -oP "ruby '\K[^']+")
+          echo "ruby_version=${ruby_version}" >> $GITHUB_ENV
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full tree jq
+          go install github.com/JohannesKaufmann/html-to-markdown/v2/cli/html2markdown@latest
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.ruby_version }}
+
+      - name: Clone and install deploy
+        run: |
+          git clone --depth=1 https://github.com/freeCodeCamp/devdocs.git
+          cd devdocs
+          gem install bundler
+          bundle install
+
+      - name: Build
+        run: |
+          chmod +x build_document.sh
+          ./build_document.sh
+
+      - name: Convert docs.json to docs.md markdown table
+        run: |
+          chmod +x docs_json_to_md.sh
+          ./docs_json_to_md.sh
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: |
+            devdocs*.zip
